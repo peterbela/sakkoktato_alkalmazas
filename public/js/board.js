@@ -202,6 +202,73 @@ function setupBoardForTask(lessonId, task) {
     return;
   }
 
+  if (positionKey === "bishop_two_captures") {
+  boardState[4][3] = { code: "wB", type: "B", color: "white" }; // d4
+
+  boardState[1][0] = { code: "bP", type: "P", color: "black" }; // a7 - csali gyalog
+  boardState[1][6] = { code: "bB", type: "B", color: "black" }; // g7 - cél futó
+
+  boardState[6][1] = { code: "wP", type: "P", color: "white" }; // b2
+  boardState[6][5] = { code: "wP", type: "P", color: "white" }; // f2
+  boardState[7][4] = { code: "wK", type: "K", color: "white" }; // e1
+
+  boardState[0][4] = { code: "bK", type: "K", color: "black" }; // e8
+  boardState[1][3] = { code: "bP", type: "P", color: "black" }; // d7
+  boardState[2][7] = { code: "bP", type: "P", color: "black" }; // h6
+  return;
+}
+
+if (positionKey === "knight_center_options") {
+  boardState[4][3] = { code: "wN", type: "N", color: "white" }; // d4 - huszár
+
+  boardState[2][2] = { code: "wP", type: "P", color: "white" }; // c6 - saját bábu, ide nem léphet
+  boardState[3][1] = { code: "bP", type: "P", color: "black" }; // b5 - üthető
+  boardState[5][1] = { code: "bB", type: "B", color: "black" }; // b3 - üthető
+  boardState[2][4] = { code: "bP", type: "P", color: "black" }; // e6 - üthető
+
+  boardState[6][4] = { code: "wP", type: "P", color: "white" }; // e2
+  boardState[6][6] = { code: "wP", type: "P", color: "white" }; // g2
+  boardState[7][4] = { code: "wK", type: "K", color: "white" }; // e1
+
+  boardState[0][4] = { code: "bK", type: "K", color: "black" }; // e8
+  boardState[1][6] = { code: "bP", type: "P", color: "black" }; // g7
+  return;
+}
+
+if (positionKey === "knight_block_check") {
+  boardState[7][4] = { code: "wK", type: "K", color: "white" }; // e1
+  boardState[0][4] = { code: "bR", type: "R", color: "black" }; // e8 - sakkot ad
+  boardState[0][6] = { code: "bK", type: "K", color: "black" }; // g8
+
+  boardState[5][2] = { code: "wN", type: "N", color: "white" }; // c3 - e2-re lép
+  boardState[6][0] = { code: "wP", type: "P", color: "white" }; // a2
+  boardState[6][1] = { code: "wP", type: "P", color: "white" }; // b2
+  boardState[6][6] = { code: "wP", type: "P", color: "white" }; // g2
+  boardState[7][0] = { code: "wR", type: "R", color: "white" }; // a1
+
+  boardState[1][0] = { code: "bP", type: "P", color: "black" }; // a7
+  boardState[1][5] = { code: "bP", type: "P", color: "black" }; // f7
+  boardState[2][2] = { code: "bB", type: "B", color: "black" }; // c6
+  return;
+}
+
+if (positionKey === "knight_capture_piece") {
+  boardState[4][4] = { code: "wN", type: "N", color: "white" }; // e4
+
+  boardState[2][5] = { code: "bQ", type: "Q", color: "black" }; // f6 - célpont
+  boardState[3][2] = { code: "bP", type: "P", color: "black" }; // c5 - másik üthető bábu
+  boardState[5][2] = { code: "wP", type: "P", color: "white" }; // c3 - saját bábu, oda nem léphet
+
+  boardState[7][4] = { code: "wK", type: "K", color: "white" }; // e1
+  boardState[7][0] = { code: "wR", type: "R", color: "white" }; // a1
+  boardState[6][3] = { code: "wP", type: "P", color: "white" }; // d2
+  boardState[6][5] = { code: "wP", type: "P", color: "white" }; // f2
+
+  boardState[0][4] = { code: "bK", type: "K", color: "black" }; // e8
+  boardState[0][0] = { code: "bR", type: "R", color: "black" }; // a8
+  boardState[1][6] = { code: "bP", type: "P", color: "black" }; // g7
+  return;
+}
   setupBoardForLesson(lessonId);
 }
 

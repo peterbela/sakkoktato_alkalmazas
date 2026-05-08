@@ -1,5 +1,6 @@
 // --- Feladat állapot beállítása ---
 function setTask(task) {
+  taskCompleted = false;  
   currentTask = task;
   currentStepIndex = 0;
 

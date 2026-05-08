@@ -23,7 +23,7 @@ document
 
 // induláskor sakktábla kirajzolása + leckék és haladás betöltése
 generateChessboard();
-setupLessonNav();
 setupUserPanel();
 updateUserUi();
-initProgress();
+setupLessonNav().then(() => {
+initProgress()});

@@ -25,3 +25,4 @@ let currentTasks = [];
 let currentTaskIndex = 0;
 let currentUser = null;
 let currentTurn = "white";
+let taskCompleted = false;

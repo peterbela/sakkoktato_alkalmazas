@@ -3,9 +3,9 @@ const LESSON_TASK_TOTALS = {
   intro: 1,
   board: 1,
   pawn: 1,
-  rook: 1,
-  bishop: 1,
-  knight: 1,
+  rook: 2,
+  bishop: 2,
+  knight: 4,
   queen: 1,
   king: 1,
   rules: 1,
@@ -51,7 +51,7 @@ function updateProgressUi() {
       return;
     }
 
-    const meta = availableLESSONS.find((l) => l.id === lessonId);
+   const meta = availableLessons.find((l) => l.id === lessonId);
     const name = meta ? meta.title : lessonId;
 
     const stored = progressState.lessons[lessonId];
@@ -67,34 +67,21 @@ function updateProgressUi() {
 
 function completeCurrentTask() {
   if (!currentLessonId || !currentTask) {
-    setTaskFeedback("A feladat teljesült, de a rendszer nem találja az aktuális feladat adatait.", false);
+    setTaskFeedback(
+      "A feladat teljesült, de a rendszer nem találja az aktuális feladat adatait.",
+      false
+    );
     return;
   }
 
   if (!currentTask.id) {
     console.error("Hiányzó currentTask.id:", currentTask);
-    setTaskFeedback("A feladat helyes, de az XP mentés nem sikerült, mert hiányzik a feladat azonosítója.", false);
+    setTaskFeedback(
+      "A feladat helyes, de az XP mentés nem sikerült, mert hiányzik a feladat azonosítója.",
+      false
+    );
     return;
   }
-
-  const lessonId = currentLessonId;
-  const totalTasks = LESSON_TASK_TOTALS[lessonId] || currentTasks.length || 1;
-
-  let stored = progressState.lessons[lessonId];
-  if (!stored) {
-    stored = {
-      completedTasks: 0,
-      totalTasks: totalTasks,
-      xpEarned: 0,
-    };
-  }
-
-  stored.completedTasks = Math.min(stored.completedTasks + 1, stored.totalTasks);
-  progressState.lessons[lessonId] = stored;
-  progressState.lastLessonId = lessonId;
-
-  saveProgress();
-  updateProgressUi();
 
   if (!currentUser) {
     setTaskFeedback(
@@ -115,6 +102,33 @@ function completeCurrentTask() {
 
     currentUser = result.user;
     saveCurrentUser();
+
+    const lessonId = currentLessonId;
+    const totalTasks = currentTasks.length || LESSON_TASK_TOTALS[lessonId] || 1;
+
+    let stored = progressState.lessons[lessonId];
+    if (!stored) {
+      stored = {
+        completedTasks: 0,
+        totalTasks: totalTasks,
+        xpEarned: 0,
+      };
+    }
+
+    stored.totalTasks = totalTasks;
+
+    if (!result.alreadyCompleted) {
+      stored.completedTasks = Math.min(
+        stored.completedTasks + 1,
+        stored.totalTasks
+      );
+      stored.xpEarned = (stored.xpEarned || 0) + (result.xpAwarded || 0);
+    }
+
+    progressState.lessons[lessonId] = stored;
+    progressState.lastLessonId = lessonId;
+
+    saveProgress();
     updateUserUi();
     updateProgressUi();
     updateLessonLocks();
@@ -133,13 +147,12 @@ function completeCurrentTask() {
   });
 }
 
-
 function initProgress() {
   loadProgress();
 
   // ha van utolsó lecke mentve, arra ugrunk vissza, különben intro
   const candidate = progressState.lastLessonId;
-  const hasCandidate = !!availableLESSONS.find((l) => l.id === candidate);
+  const hasCandidate = !!availableLessons.find((l) => l.id === candidate);
   const startLessonId = hasCandidate ? candidate : "intro";
 
   loadLesson(startLessonId);

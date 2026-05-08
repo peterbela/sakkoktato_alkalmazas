@@ -16,6 +16,13 @@ function switchTurn() {
 }
 // --- Kattintás egy mezőre: feladatkezelés + kijelöl + lép ---
 function onSquareClick(e) {
+  if (taskCompleted) {
+  setTaskFeedback(
+    "✅ Ezt a feladatot már teljesítetted. Új próbálkozáshoz válassz másik feladatot vagy nyomd meg a Következő feladat gombot.",
+    true
+  );
+  return;
+}
   const square = e.currentTarget;
   const row = parseInt(square.dataset.row, 10);
   const col = parseInt(square.dataset.col, 10);
@@ -25,6 +32,7 @@ function onSquareClick(e) {
   if (currentTask && currentTask.type === "click-square") {
     const target = currentTask.target;
     if (target && target.row === row && target.col === col) {
+      taskCompleted = true;
       setTaskFeedback("✅ Ügyes! A jó mezőt választottad.", true);
       completeCurrentTask();
     } else {
@@ -120,6 +128,7 @@ function onSquareClick(e) {
       t.to && t.to.row === row && t.to.col === col;
 
     if (correctFrom && correctTo) {
+      taskCompleted = true;
       setTaskFeedback(
         "✅ Szuper! Pontosan azt a lépést hajtottad végre, amit a feladat kért.",
         true
@@ -129,17 +138,30 @@ function onSquareClick(e) {
       boardState[fromRow][fromCol] = selectedPiece;
       boardState[row][col] = capturedPiece;
 
-      if (!correctFrom && currentTask.wrongPieceMessage) {
-        setTaskFeedback(currentTask.wrongPieceMessage, false);
-      } else if (!correctTo && currentTask.wrongTargetMessage) {
-        setTaskFeedback(currentTask.wrongTargetMessage, false);
-      } else {
-        setTaskFeedback(
-          currentTask.tacticalMessage ||
-            "Ez a lépés szabályos volt, de nem oldja meg a feladatot.",
-          false
-        );
-      }
+      if (
+  currentTask &&
+  currentTask.type === "move-piece" &&
+  currentTask.from &&
+  currentTask.from.row === 5 &&
+  currentTask.from.col === 2 &&
+  row === 4 &&
+  col === 4
+) {
+  setTaskFeedback(
+    "Ez a lépés valóban blokkolja a sakkot, de a huszárt ingyen odaadtad: a fekete bástya egyszerűen leütheti, és utána újra sakkban lenne a királyod.",
+    false
+  );
+} else if (!correctFrom && currentTask.wrongPieceMessage) {
+  setTaskFeedback(currentTask.wrongPieceMessage, false);
+} else if (!correctTo && currentTask.wrongTargetMessage) {
+  setTaskFeedback(currentTask.wrongTargetMessage, false);
+} else {
+  setTaskFeedback(
+    currentTask.tacticalMessage ||
+      "Ez a lépés szabályos volt, de nem oldja meg a feladatot.",
+    false
+  );
+}
 
       selectedSquare = null;
       clearHighlights();
@@ -160,6 +182,7 @@ function onSquareClick(e) {
       currentStepIndex++;
 
       if (currentStepIndex === currentTask.steps.length) {
+        taskCompleted = true;
         setTaskFeedback("✅ Kész! Mindkét lépés helyes volt.", true);
         completeCurrentTask();
       } else {
@@ -213,7 +236,8 @@ if (currentTask && currentTask.type === "two-turns") {
       taskTextEl.textContent =
         currentTask.description + " (2. lépés: sötét)";
     }
-  } else {
+  } else { 
+    taskCompleted = true;
     setTaskFeedback("✅ Kész! Világos és sötét is lépett szabályosan.", true);
     completeCurrentTask();
   }
@@ -233,6 +257,7 @@ if (currentTask && currentTask.type === "two-turns") {
   const gaveCheck = isKingInCheck(targetColor);
 
   if (gaveCheck && correctPieceType && correctPieceColor) {
+    taskCompleted = true;
     setTaskFeedback("✅ Jó lépés! A megadott bábuval sakkot adtál.", true);
     completeCurrentTask();
   } else {
@@ -261,12 +286,14 @@ if (currentTask && currentTask.type === "two-turns") {
   }
 }
 
+ if (!currentTask || currentTask.type === "two-turns") {
   switchTurn();
+}
 
-  selectedSquare = null;
-  clearHighlights();
-  renderPieces();
-  return;
+selectedSquare = null;
+clearHighlights();
+renderPieces();
+return;
 }
 
   // Ha nem érvényes mezőre kattintottunk, de ott van egy SAJÁT bábu → váltunk kijelölést

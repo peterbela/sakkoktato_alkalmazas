@@ -170,7 +170,7 @@ Két mezőt halad egy irányba, majd egy mezőt merőlegesen. A huszár különl
         body: `A vezér a legerősebb bábu.
 
 Úgy léphet, mint a bástya, vagyis egyenesen, és úgy is, mint a futó, vagyis átlósan. Bármennyi mezőt mehet, amíg nem ütközik akadályba.`,
-        level_required: 2,
+        level_required: 3,
         order_index: 7,
       },
       {
@@ -273,6 +273,24 @@ Patt: a játékos nem tud szabályosan lépni és nincs sakkban. Ez döntetlen.`
         xp_reward: 10,
       },
       {
+  lesson_id: "bishop",
+  type: "move-piece",
+  description:
+    "A futó két irányba is tudna ütni. Üsd le vele a fekete futót!",
+  position_key: "bishop_two_captures",
+  wrong_piece_message:
+    "Ez szabályos lépés volt, de nem a megfelelő bábuval léptél. A fehér futóval kell megoldani a feladatot.",
+  wrong_target_message:
+    "Ez szabályos futólépés volt, de most nem ezt a bábut kell leütni. A feladat a fekete futó leütését kéri.",
+  tactical_message:
+    "Nézd meg mindkét átlót: a futó több irányba is támadhat, de most a fontosabb célpont a fekete futó.",
+  from_row: 4,
+  from_col: 3,
+  to_row: 1,
+  to_col: 6,
+  xp_reward: 10,
+},
+      {
         lesson_id: "knight",
         type: "move-piece",
         description: "Léptesd a huszárt g1-ről f3-ra!",
@@ -282,6 +300,60 @@ Patt: a játékos nem tud szabályosan lépni és nincs sakkban. Ez döntetlen.`
         to_col: 5,
         xp_reward: 10,
       },
+      {
+  lesson_id: "knight",
+  type: "move-piece",
+  description:
+    "A huszár a tábla közepén áll. Több helyre is léphet, de most lépj vele az üres f5 mezőre!",
+  position_key: "knight_center_options",
+  wrong_piece_message:
+    "Ez szabályos lépés volt, de nem a huszárral léptél. A középen álló fehér huszárt kell használnod.",
+  wrong_target_message:
+    "Ez szabályos huszárlépés volt, de nem a feladat szerinti mező. Most az üres f5 mezőre kell lépni.",
+  tactical_message:
+    "Figyeld meg, hogy a huszár átugorhat más bábukat, de saját bábuval foglalt mezőre nem léphet.",
+  from_row: 4,
+  from_col: 3,
+  to_row: 3,
+  to_col: 5,
+  xp_reward: 10,
+},
+{
+  lesson_id: "knight",
+  type: "move-piece",
+  description:
+    "A fekete bástya sakkot ad a királynak. Blokkold a sakkot a huszárral!",
+  position_key: "knight_block_check",
+  wrong_piece_message:
+    "Most a huszárral kell védekezni. Olyan mezőre kell lépnie, ahol elzárja a bástya támadási vonalát.",
+ wrong_target_message:
+  "Ez szabályos huszárlépés volt, de nem ez a legjobb védekezés. A feladatban olyan mezőt keress, ahol a huszár biztonságosan blokkolja a bástya támadási vonalát.",
+  tactical_message:
+    "A bástya egyenes vonalban támad. Keress olyan huszárlépést, amely közéjük állít egy bábut.",
+  from_row: 5,
+  from_col: 2,
+  to_row: 6,
+  to_col: 4,
+  xp_reward: 10,
+},
+{
+  lesson_id: "knight",
+  type: "move-piece",
+  description:
+    "Üsd le a huszárral a fekete vezért!",
+  position_key: "knight_capture_piece",
+  wrong_piece_message:
+    "Ez szabályos lépés volt, de nem a huszárral léptél. A fehér huszárral kell leütni a vezért.",
+  wrong_target_message:
+    "Ez szabályos huszárlépés volt, de nem a legfontosabb célpontot ütötted le. Most a fekete vezért kell leütni.",
+  tactical_message:
+    "A huszár veszélyes taktikai bábu: gyakran váratlanul tud értékes figurát támadni.",
+  from_row: 4,
+  from_col: 4,
+  to_row: 2,
+  to_col: 5,
+  xp_reward: 10,
+},
       {
         lesson_id: "queen",
         type: "move-piece",

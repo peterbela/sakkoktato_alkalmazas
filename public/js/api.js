@@ -65,6 +65,7 @@ async function saveTaskResult(userId, taskId) {
     return await res.json();
   } catch (err) {
     console.error("❌ Feladat eredmény mentési hiba:", err);
+    alert(err.message);
     return null;
   }
 }
