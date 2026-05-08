@@ -64,6 +64,23 @@ function updateProgressUi() {
     lessonProgEl.textContent = `${name}: ${completed}/${total} feladat teljesítve`;
   }
 }
+function getNextTaskSuggestion() {
+  return "A folytatáshoz kattints a „Következő feladat” gombra, vagy válassz másik leckét a menüből.";
+}
+
+function getLevelUpMessage(previousLevel, newLevel) {
+  if (!newLevel || newLevel <= previousLevel) return "";
+
+  if (newLevel === 2) {
+    return " 🎉 Szintet léptél! Elérted a 2. szintet, így elérhetővé váltak a futó és huszár leckék.";
+  }
+
+  if (newLevel === 3) {
+    return " 🎉 Szintet léptél! Elérted a 3. szintet, így elérhetővé váltak a nehezebb szabály- és tisztfeladatok.";
+  }
+
+  return ` 🎉 Szintet léptél! Most már ${newLevel}. szintű játékos vagy.`;
+}
 
 function completeCurrentTask() {
   if (!currentLessonId || !currentTask) {
@@ -91,6 +108,7 @@ function completeCurrentTask() {
     return;
   }
 
+  const previousLevel = currentUser.level || 1;
   saveTaskResult(currentUser.id, currentTask.id).then((result) => {
     if (!result) {
       setTaskFeedback(
@@ -133,17 +151,20 @@ function completeCurrentTask() {
     updateProgressUi();
     updateLessonLocks();
 
-    if (result.alreadyCompleted) {
-      setTaskFeedback(
-        "✅ Jó megoldás! Ezt a feladatot már korábban teljesítetted, ezért most nem kaptál új XP-t.",
-        true
-      );
-    } else {
-      setTaskFeedback(
-        `✅ Jó megoldás! +${result.xpAwarded} XP jóváírva.`,
-        true
-      );
-    }
+   const nextSuggestion = getNextTaskSuggestion();
+const levelUpMessage = getLevelUpMessage(previousLevel, currentUser.level);
+
+if (result.alreadyCompleted) {
+  setTaskFeedback(
+    `✅ Jó megoldás! Ezt a feladatot már korábban teljesítetted, ezért most nem kaptál új XP-t. ${nextSuggestion}`,
+    true
+  );
+} else {
+  setTaskFeedback(
+    `✅ Jó megoldás! +${result.xpAwarded} XP jóváírva.${levelUpMessage} ${nextSuggestion}`,
+    true
+  );
+}
   });
 }
 
