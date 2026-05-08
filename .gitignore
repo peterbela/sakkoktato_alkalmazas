@@ -1,0 +1,4 @@
+node_modules/
+sakk.db
+.env
+.DS_Store
