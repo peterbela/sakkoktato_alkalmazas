@@ -185,11 +185,19 @@ async function initProgress() {
     saveProgress();
   }
 
-  // ha van utolsó lecke mentve, arra ugrunk vissza, különben intro
-  const candidate = progressState.lastLessonId;
-  const hasCandidate = !!availableLessons.find((l) => l.id === candidate);
-  const startLessonId = hasCandidate ? candidate : "intro";
+ const candidate = progressState.lastLessonId;
+const hasCandidate = !!availableLessons.find((l) => l.id === candidate);
+const canOpenCandidate =
+  hasCandidate && typeof canCurrentUserOpenLesson === "function"
+    ? canCurrentUserOpenLesson(candidate)
+    : false;
 
-  loadLesson(startLessonId);
-  updateProgressUi();
+const startLessonId = canOpenCandidate
+  ? candidate
+  : typeof getFirstAvailableLessonId === "function"
+    ? getFirstAvailableLessonId()
+    : "intro";
+
+loadLesson(startLessonId);
+updateProgressUi();
 }

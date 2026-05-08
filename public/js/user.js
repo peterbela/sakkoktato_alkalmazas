@@ -47,6 +47,8 @@ function setupUserPanel() {
     currentUser = user;
     saveCurrentUser();
     updateUserUi();
+    progressState.lastLessonId = null;
+saveProgress();
     updateProgressUi();
     updateLessonLocks();
   });

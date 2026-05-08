@@ -143,7 +143,49 @@ function updateTaskCounterUi() {
   taskTextEl.textContent = prefix + taskTextEl.textContent;
 }
 
+function canCurrentUserOpenLesson(lessonId) {
+  const lesson = availableLessons.find((item) => item.id === lessonId);
+  if (!lesson) return false;
+
+  const userLevel = currentUser ? currentUser.level : 1;
+  const requiredLevel = lesson.level_required || 1;
+
+  return userLevel >= requiredLevel;
+}
+
+function getFirstAvailableLessonId() {
+  const userLevel = currentUser ? currentUser.level : 1;
+
+  const firstAvailable = availableLessons.find((lesson) => {
+    const requiredLevel = lesson.level_required || 1;
+    return userLevel >= requiredLevel;
+  });
+
+  return firstAvailable ? firstAvailable.id : "intro";
+}
 async function loadLesson(id) {
+  if (!canCurrentUserOpenLesson(id)) {
+    const lesson = availableLessons.find((item) => item.id === id);
+    const requiredLevel = lesson ? lesson.level_required || 1 : 1;
+
+    clearBoardState();
+    clearHighlights();
+    selectedSquare = null;
+    currentTask = null;
+    currentTasks = [];
+    currentTaskIndex = 0;
+    taskCompleted = true;
+
+    renderPieces();
+
+    setTaskFeedback(
+      `Ez a lecke csak ${requiredLevel}. szinttől érhető el. Válassz egy elérhető leckét.`,
+      false
+    );
+
+    return;
+  }
+
   currentLessonId = id;
 
   const lessonData = await fetchLessonFromApi(id);
@@ -176,6 +218,14 @@ async function loadLesson(id) {
   updateProgressUi();
 }
 function loadNextTask() {
+  if (!currentLessonId || !canCurrentUserOpenLesson(currentLessonId)) {
+    setTaskFeedback(
+      "Ehhez a leckéhez még nincs elég szinted. Válassz egy elérhető leckét a bal oldali menüből.",
+      false
+    );
+    return;
+  }
+
   if (!currentTasks || currentTasks.length === 0) return;
 
   currentTaskIndex++;
