@@ -1,3 +1,15 @@
+// Leckénként hány feladat van (most mindegyiknél 1, később bővíthető)
+const LESSON_TASK_TOTALS = {
+  intro: 1,
+  board: 1,
+  pawn: 1,
+  rook: 1,
+  bishop: 1,
+  knight: 1,
+  queen: 1,
+  king: 1,
+  rules: 1,
+};
 function loadProgress() {
   try {
     const raw = localStorage.getItem(PROGRESS_STORAGE_KEY);
@@ -39,7 +51,7 @@ function updateProgressUi() {
       return;
     }
 
-    const meta = LESSONS.find((l) => l.id === lessonId);
+    const meta = availableLESSONS.find((l) => l.id === lessonId);
     const name = meta ? meta.title : lessonId;
 
     const stored = progressState.lessons[lessonId];
@@ -112,7 +124,7 @@ function initProgress() {
 
   // ha van utolsó lecke mentve, arra ugrunk vissza, különben intro
   const candidate = progressState.lastLessonId;
-  const hasCandidate = !!LESSONS.find((l) => l.id === candidate);
+  const hasCandidate = !!availableLESSONS.find((l) => l.id === candidate);
   const startLessonId = hasCandidate ? candidate : "intro";
 
   loadLesson(startLessonId);

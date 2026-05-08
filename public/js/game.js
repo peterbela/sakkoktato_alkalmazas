@@ -1,3 +1,19 @@
+// Felváltva lépnek a világos és sötét bábuk
+function getTurnLabel() {
+  return currentTurn === "white" ? "Világos" : "Sötét";
+}
+
+function updateTurnUi() {
+  const turnText = document.getElementById("turnText");
+  if (turnText) {
+    turnText.textContent = `${getTurnLabel()} következik.`;
+  }
+}
+
+function switchTurn() {
+  currentTurn = currentTurn === "white" ? "black" : "white";
+  updateTurnUi();
+}
 // --- Kattintás egy mezőre: feladatkezelés + kijelöl + lép ---
 function onSquareClick(e) {
   const square = e.currentTarget;
