@@ -32,6 +32,7 @@ db.serialize(() => {
     lesson_id TEXT NOT NULL,
     type TEXT NOT NULL,
     description TEXT NOT NULL,
+    position_key TEXT,
 
     checklist TEXT,
     wrong_piece_message TEXT,
@@ -231,15 +232,36 @@ Patt: a játékos nem tud szabályosan lépni és nincs sakkban. Ez döntetlen.`
   xp_reward: 10,
 },
       {
-        lesson_id: "rook",
-        type: "move-piece",
-        description: "Léptesd a bástyát d4-ről d7-re!",
-        from_row: 4,
-        from_col: 3,
-        to_row: 1,
-        to_col: 3,
-        xp_reward: 10,
-      },
+  lesson_id: "rook",
+  type: "move-piece",
+  description: "Léptesd a bástyát d4-ről d7-re!",
+  position_key: "rook_basic",
+  from_row: 4,
+  from_col: 3,
+  to_row: 1,
+  to_col: 3,
+  xp_reward: 10,
+},
+
+  {
+  lesson_id: "rook",
+  type: "move-piece",
+  description:
+    "Két fehér bástya van a táblán. Válaszd ki azt, amelyikkel le tudod ütni a d7-en álló fekete huszárt!",
+  position_key: "rook_two_rooks",
+  wrong_piece_message:
+    "Ez szabályos lépés volt, de nem azzal a bástyával indultál, amelyik eléri a d7 mezőt.",
+  wrong_target_message:
+    "Ez szabályos lépés volt, de nem a d7 mezőre léptél.",
+  tactical_message:
+    "Gondold végig, melyik bástya mozog egyenes vonalban a d7 mező felé.",
+  from_row: 4,
+  from_col: 3,
+  to_row: 1,
+  to_col: 3,
+  xp_reward: 10,
+},
+
       {
         lesson_id: "bishop",
         type: "move-piece",
@@ -317,7 +339,7 @@ Patt: a játékos nem tud szabályosan lépni és nincs sakkban. Ez döntetlen.`
 
  const insertTask = db.prepare(`
   INSERT INTO tasks (
-    lesson_id, type, description,
+    lesson_id, type, description,position_key,
     checklist,
     wrong_piece_message,
     wrong_target_message,
@@ -330,7 +352,7 @@ Patt: a játékos nem tud szabályosan lépni és nincs sakkban. Ez döntetlen.`
     required_piece_color,
     xp_reward
   )
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `);
 
    tasks.forEach((task) => {
@@ -338,6 +360,7 @@ Patt: a játékos nem tud szabályosan lépni és nincs sakkban. Ez döntetlen.`
   task.lesson_id,
   task.type,
   task.description,
+  task.position_key ?? null,
 
   task.checklist ?? null,
   task.wrong_piece_message ?? null,
@@ -424,6 +447,7 @@ app.get("/api/lessons/:id", (req, res) => {
           lesson_id,
           type,
           description,
+          position_key,
           checklist,
           wrong_piece_message,
           wrong_target_message,

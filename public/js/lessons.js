@@ -167,7 +167,7 @@ async function loadLesson(id) {
 
   if (currentTasks.length > 0) {
     applyTaskFromApi(currentTasks[currentTaskIndex]);
-    setupBoardForLesson(id);
+    setupBoardForTask(id, currentTasks[currentTaskIndex]);
     updateTaskCounterUi();
   }
 
@@ -191,7 +191,7 @@ function loadNextTask() {
   updateTurnUi();
 
   applyTaskFromApi(currentTasks[currentTaskIndex]);
-  setupBoardForLesson(currentLessonId);
+  setupBoardForTask(currentLessonId, currentTasks[currentTaskIndex]);
   updateTaskCounterUi();
   renderPieces();
 }

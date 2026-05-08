@@ -66,10 +66,19 @@ function updateProgressUi() {
 }
 
 function completeCurrentTask() {
-  if (!currentLessonId || !currentTask) return;
+  if (!currentLessonId || !currentTask) {
+    setTaskFeedback("A feladat teljesült, de a rendszer nem találja az aktuális feladat adatait.", false);
+    return;
+  }
+
+  if (!currentTask.id) {
+    console.error("Hiányzó currentTask.id:", currentTask);
+    setTaskFeedback("A feladat helyes, de az XP mentés nem sikerült, mert hiányzik a feladat azonosítója.", false);
+    return;
+  }
 
   const lessonId = currentLessonId;
-  const totalTasks = LESSON_TASK_TOTALS[lessonId] || 1;
+  const totalTasks = LESSON_TASK_TOTALS[lessonId] || currentTasks.length || 1;
 
   let stored = progressState.lessons[lessonId];
   if (!stored) {
@@ -96,7 +105,13 @@ function completeCurrentTask() {
   }
 
   saveTaskResult(currentUser.id, currentTask.id).then((result) => {
-    if (!result) return;
+    if (!result) {
+      setTaskFeedback(
+        "A feladat helyes, de az XP mentése közben hiba történt.",
+        false
+      );
+      return;
+    }
 
     currentUser = result.user;
     saveCurrentUser();

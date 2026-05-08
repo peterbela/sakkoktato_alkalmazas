@@ -109,10 +109,17 @@ function setupBoardForLesson(id) {
   }
 
   if (id === "rook") {
-    boardState[4][3] = { code: "wR", type: "R", color: "white" }; // d4
-    boardState[1][3] = { code: "bN", type: "N", color: "black" }; // d7
-    return;
-  }
+  boardState[4][3] = { code: "wR", type: "R", color: "white" }; // d4 - jó bástya
+  boardState[4][0] = { code: "wR", type: "R", color: "white" }; // a4 - zavaró bástya
+  boardState[1][3] = { code: "bN", type: "N", color: "black" }; // d7 - célpont
+
+  boardState[6][3] = { code: "wP", type: "P", color: "white" }; // d2
+  boardState[1][0] = { code: "bP", type: "P", color: "black" }; // a7
+  boardState[1][7] = { code: "bP", type: "P", color: "black" }; // h7
+  boardState[7][4] = { code: "wK", type: "K", color: "white" }; // e1
+  boardState[0][4] = { code: "bK", type: "K", color: "black" }; // e8
+  return;
+}
 
   if (id === "bishop") {
     boardState[7][2] = { code: "wB", type: "B", color: "white" }; // c1
@@ -171,6 +178,33 @@ function setupBoardForLesson(id) {
 }
 
 }
+function setupBoardForTask(lessonId, task) {
+  const positionKey = task ? task.position_key : null;
+
+  if (positionKey === "rook_basic") {
+    boardState[4][3] = { code: "wR", type: "R", color: "white" }; // d4
+    boardState[1][3] = { code: "bN", type: "N", color: "black" }; // d7
+    boardState[7][4] = { code: "wK", type: "K", color: "white" }; // e1
+    boardState[0][4] = { code: "bK", type: "K", color: "black" }; // e8
+    return;
+  }
+
+  if (positionKey === "rook_two_rooks") {
+    boardState[4][3] = { code: "wR", type: "R", color: "white" }; // d4 - jó bástya
+    boardState[4][0] = { code: "wR", type: "R", color: "white" }; // a4 - zavaró bástya
+    boardState[1][3] = { code: "bN", type: "N", color: "black" }; // d7
+
+    boardState[6][3] = { code: "wP", type: "P", color: "white" }; // d2
+    boardState[1][0] = { code: "bP", type: "P", color: "black" }; // a7
+    boardState[1][7] = { code: "bP", type: "P", color: "black" }; // h7
+    boardState[7][4] = { code: "wK", type: "K", color: "white" }; // e1
+    boardState[0][4] = { code: "bK", type: "K", color: "black" }; // e8
+    return;
+  }
+
+  setupBoardForLesson(lessonId);
+}
+
 function setStartingPosition() {
   clearBoardState();
   clearHighlights();
