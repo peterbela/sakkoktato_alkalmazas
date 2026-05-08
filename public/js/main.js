@@ -17,6 +17,9 @@ document
 document
   .getElementById("startPositionBtn")
   .addEventListener("click", setStartingPosition);
+  document
+  .getElementById("nextTaskBtn")
+  .addEventListener("click", loadNextTask);
 
 // induláskor sakktábla kirajzolása + leckék és haladás betöltése
 generateChessboard();

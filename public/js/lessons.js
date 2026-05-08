@@ -48,6 +48,100 @@ function renderDefaultChecklist() {
     checklistEl.appendChild(li);
   });
 }
+function applyTaskFromApi(task) {
+  if (!task) {
+    setTask(null);
+    return;
+  }
+
+  renderDefaultChecklist();
+
+  if (task.type === "click-square") {
+    setTask({
+      id: task.id,
+      type: "click-square",
+      target: {
+        row: task.target_row,
+        col: task.target_col,
+      },
+      description: task.description,
+    });
+  } else if (task.type === "move-piece") {
+    setTask({
+      id: task.id,
+      type: "move-piece",
+      from: {
+        row: task.from_row,
+        col: task.from_col,
+      },
+      to: {
+        row: task.to_row,
+        col: task.to_col,
+      },
+      description: task.description,
+      wrongPieceMessage: task.wrong_piece_message,
+      wrongTargetMessage: task.wrong_target_message,
+      tacticalMessage: task.tactical_message,
+    });
+  } else if (task.type === "two-step") {
+    setTask({
+      id: task.id,
+      type: "two-step",
+      description: task.description,
+      steps: [
+        {
+          from: {
+            row: task.from_row,
+            col: task.from_col,
+          },
+          to: {
+            row: task.to_row,
+            col: task.to_col,
+          },
+        },
+        {
+          from: {
+            row: task.from_row2,
+            col: task.from_col2,
+          },
+          to: {
+            row: task.to_row2,
+            col: task.to_col2,
+          },
+        },
+      ],
+    });
+  } else if (task.type === "two-turns") {
+    setTask({
+      id: task.id,
+      type: "two-turns",
+      description: task.description,
+      tacticalMessage: task.tactical_message,
+    });
+  } else if (task.type === "give-check") {
+    setTask({
+      id: task.id,
+      type: "give-check",
+      description: task.description,
+      targetColor: task.target_color || "black",
+      requiredPieceType: task.required_piece_type || null,
+      requiredPieceColor: task.required_piece_color || null,
+      wrongPieceMessage: task.wrong_piece_message,
+      wrongTargetMessage: task.wrong_target_message,
+      tacticalMessage: task.tactical_message,
+    });
+  }
+}
+
+function updateTaskCounterUi() {
+  const taskTextEl = document.getElementById("taskText");
+
+  if (!taskTextEl || !currentTask) return;
+
+  const prefix = `Feladat ${currentTaskIndex + 1}/${currentTasks.length}: `;
+  taskTextEl.textContent = prefix + taskTextEl.textContent;
+}
+
 async function loadLesson(id) {
   currentLessonId = id;
 
@@ -60,107 +154,48 @@ async function loadLesson(id) {
   if (titleEl) titleEl.textContent = lessonData.title;
   if (bodyEl) bodyEl.textContent = lessonData.body.trim();
 
-  // reset
   clearBoardState();
   clearHighlights();
   selectedSquare = null;
   currentTask = null;
+  currentStepIndex = 0;
   currentTurn = "white";
   updateTurnUi();
 
+  currentTasks = lessonData.tasks || [];
+  currentTaskIndex = 0;
 
-  // 👉 FELADATOK BACKENDBŐL
-  if (lessonData.tasks && lessonData.tasks.length > 0) {
-    const task = lessonData.tasks[0];
-     // ✅ CHECKLIST megjelenítés
-  renderDefaultChecklist();
-    if (task.type === "click-square") {
-      setTask({
-        id: task.id,
-        type: "click-square",
-        target: {
-          row: task.target_row,
-          col: task.target_col,
-        },
-        description: task.description,
-      });
-    }
-
-    else if (task.type === "move-piece") {
-setTask({
-  id: task.id,
-  type: "move-piece",
-  from: {
-    row: task.from_row,
-    col: task.from_col,
-  },
-  to: {
-    row: task.to_row,
-    col: task.to_col,
-  },
-  description: task.description,
-  wrongPieceMessage: task.wrong_piece_message,
-  wrongTargetMessage: task.wrong_target_message,
-  tacticalMessage: task.tactical_message,
-});
-    }
-    else if (task.type === "two-step") {
-  setTask({
-    id: task.id,
-    type: "two-step",
-    description: task.description,
-    steps: [
-      {
-        from: {
-          row: task.from_row,
-          col: task.from_col,
-        },
-        to: {
-          row: task.to_row,
-          col: task.to_col,
-        },
-      },
-      {
-        from: {
-          row: task.from_row2,
-          col: task.from_col2,
-        },
-        to: {
-          row: task.to_row2,
-          col: task.to_col2,
-        },
-      },
-    ],
-  });
-}
-else if (task.type === "two-turns") {
-  setTask({
-    id: task.id,
-    type: "two-turns",
-    description: task.description,
-    tacticalMessage: task.tactical_message,
-  });
-}
-else if (task.type === "give-check") {
-  setTask({
-    id: task.id,
-    type: "give-check",
-    description: task.description,
-    targetColor: task.target_color || "black",
-    requiredPieceType: task.required_piece_type || null,
-    requiredPieceColor: task.required_piece_color || null,
-    wrongPieceMessage: task.wrong_piece_message,
-    wrongTargetMessage: task.wrong_target_message,
-    tacticalMessage: task.tactical_message,
-  });
-}
+  if (currentTasks.length > 0) {
+    applyTaskFromApi(currentTasks[currentTaskIndex]);
+    setupBoardForLesson(id);
+    updateTaskCounterUi();
   }
 
-
-  setupBoardForLesson(id);
   renderPieces();
   updateProgressUi();
 }
+function loadNextTask() {
+  if (!currentTasks || currentTasks.length === 0) return;
+
+  currentTaskIndex++;
+
+  if (currentTaskIndex >= currentTasks.length) {
+    currentTaskIndex = 0;
+  }
+
+  clearBoardState();
+  clearHighlights();
+  selectedSquare = null;
+  currentStepIndex = 0;
+  currentTurn = "white";
+  updateTurnUi();
+
+  applyTaskFromApi(currentTasks[currentTaskIndex]);
+  setupBoardForLesson(currentLessonId);
+  updateTaskCounterUi();
+  renderPieces();
+}
+
 
 function updateLessonLocks() {
   const buttons = document.querySelectorAll("#lessonNav button");

@@ -21,5 +21,7 @@ let currentLessonId = null;
 let currentTask = null;
 let availableLessons = [];
 let currentStepIndex = 0;
+let currentTasks = [];
+let currentTaskIndex = 0;
 let currentUser = null;
 let currentTurn = "white";
