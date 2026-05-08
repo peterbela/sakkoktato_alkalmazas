@@ -671,6 +671,53 @@ db.run(
     }
   );
 });
+// Felhasználó teljes haladásának lekérése adatbázisból
+app.get("/api/users/:id/progress", (req, res) => {
+  const userId = req.params.id;
+
+  db.all(
+    `
+    SELECT
+      l.id AS lesson_id,
+      l.title AS lesson_title,
+      l.level_required,
+      l.order_index,
+      COUNT(t.id) AS total_tasks,
+      COALESCE(SUM(
+        CASE
+          WHEN utr.id IS NOT NULL THEN 1
+          ELSE 0
+        END
+      ), 0) AS completed_tasks,
+      COALESCE(SUM(
+        CASE
+          WHEN utr.id IS NOT NULL THEN t.xp_reward
+          ELSE 0
+        END
+      ), 0) AS xp_earned
+    FROM lessons l
+    LEFT JOIN tasks t
+      ON t.lesson_id = l.id
+    LEFT JOIN user_task_results utr
+      ON utr.task_id = t.id
+      AND utr.user_id = ?
+      AND utr.is_correct = 1
+    GROUP BY l.id
+    ORDER BY l.order_index ASC
+    `,
+    [userId],
+    (err, rows) => {
+      if (err) {
+        console.error("❌ Haladás lekérdezési hiba:", err.message);
+        return res.status(500).json({
+          error: "Nem sikerült lekérni a felhasználói haladást.",
+        });
+      }
+
+      res.json(rows);
+    }
+  );
+});
 // Feladatmegoldás mentése és XP jóváírása, ha még nem kapott érte pontot
 app.post("/api/task-results", (req, res) => {
   const { userId, taskId, isCorrect } = req.body;

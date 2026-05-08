@@ -97,3 +97,18 @@ async function fetchLessonFromApi(id) {
     return null;
   }
 }
+async function fetchUserProgress(userId) {
+  try {
+    const res = await fetch(`/api/users/${userId}/progress`);
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || "Nem sikerült lekérni a haladást.");
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error("❌ Haladás API hiba:", err);
+    return [];
+  }
+}

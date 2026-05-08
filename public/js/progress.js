@@ -1,4 +1,5 @@
-// Leckénként hány feladat van (most mindegyiknél 1, később bővíthető)
+// Leckénként hány feladat van.
+// Ez csak tartalék érték, a valódi haladást a backend adja vissza.
 const LESSON_TASK_TOTALS = {
   intro: 1,
   board: 1,
@@ -10,13 +11,15 @@ const LESSON_TASK_TOTALS = {
   king: 1,
   rules: 1,
 };
+
 function loadProgress() {
   try {
     const raw = localStorage.getItem(PROGRESS_STORAGE_KEY);
     if (!raw) return;
+
     const parsed = JSON.parse(raw);
+
     if (typeof parsed === "object" && parsed !== null) {
-      // Alapértelmezett struktúra megtartása
       progressState = {
         totalXp: parsed.totalXp || 0,
         lessons: parsed.lessons || {},
@@ -36,6 +39,23 @@ function saveProgress() {
   }
 }
 
+// Backendből érkező haladás átalakítása a frontend által használt formára
+function applyBackendProgress(progressRows) {
+  if (!Array.isArray(progressRows)) return;
+
+  const lessons = {};
+
+  progressRows.forEach((row) => {
+    lessons[row.lesson_id] = {
+      completedTasks: row.completed_tasks || 0,
+      totalTasks: row.total_tasks || 0,
+      xpEarned: row.xp_earned || 0,
+    };
+  });
+
+  progressState.lessons = lessons;
+}
+
 function updateProgressUi() {
   const xpEl = document.getElementById("xpValue");
   if (xpEl) {
@@ -51,7 +71,7 @@ function updateProgressUi() {
       return;
     }
 
-   const meta = availableLessons.find((l) => l.id === lessonId);
+    const meta = availableLessons.find((l) => l.id === lessonId);
     const name = meta ? meta.title : lessonId;
 
     const stored = progressState.lessons[lessonId];
@@ -59,11 +79,13 @@ function updateProgressUi() {
       (stored && stored.totalTasks) ||
       LESSON_TASK_TOTALS[lessonId] ||
       1;
+
     const completed = stored ? stored.completedTasks || 0 : 0;
 
     lessonProgEl.textContent = `${name}: ${completed}/${total} feladat teljesítve`;
   }
 }
+
 function getNextTaskSuggestion() {
   return "A folytatáshoz kattints a „Következő feladat” gombra, vagy válassz másik leckét a menüből.";
 }
@@ -109,7 +131,8 @@ function completeCurrentTask() {
   }
 
   const previousLevel = currentUser.level || 1;
-  saveTaskResult(currentUser.id, currentTask.id).then((result) => {
+
+  saveTaskResult(currentUser.id, currentTask.id).then(async (result) => {
     if (!result) {
       setTaskFeedback(
         "A feladat helyes, de az XP mentése közben hiba történt.",
@@ -121,55 +144,46 @@ function completeCurrentTask() {
     currentUser = result.user;
     saveCurrentUser();
 
-    const lessonId = currentLessonId;
-    const totalTasks = currentTasks.length || LESSON_TASK_TOTALS[lessonId] || 1;
+    // Itt már nem kézzel növeljük a haladást,
+    // hanem újra lekérjük a backendből.
+    const backendProgress = await fetchUserProgress(currentUser.id);
+    applyBackendProgress(backendProgress);
 
-    let stored = progressState.lessons[lessonId];
-    if (!stored) {
-      stored = {
-        completedTasks: 0,
-        totalTasks: totalTasks,
-        xpEarned: 0,
-      };
-    }
-
-    stored.totalTasks = totalTasks;
-
-    if (!result.alreadyCompleted) {
-      stored.completedTasks = Math.min(
-        stored.completedTasks + 1,
-        stored.totalTasks
-      );
-      stored.xpEarned = (stored.xpEarned || 0) + (result.xpAwarded || 0);
-    }
-
-    progressState.lessons[lessonId] = stored;
-    progressState.lastLessonId = lessonId;
+    // Ezt még localStorage-ban hagyjuk, mert csak kényelmi adat:
+    // melyik lecke volt utoljára megnyitva.
+    progressState.lastLessonId = currentLessonId;
 
     saveProgress();
     updateUserUi();
     updateProgressUi();
     updateLessonLocks();
 
-   const nextSuggestion = getNextTaskSuggestion();
-const levelUpMessage = getLevelUpMessage(previousLevel, currentUser.level);
+    const nextSuggestion = getNextTaskSuggestion();
+    const levelUpMessage = getLevelUpMessage(previousLevel, currentUser.level);
 
-if (result.alreadyCompleted) {
-  setTaskFeedback(
-    `✅ Jó megoldás! Ezt a feladatot már korábban teljesítetted, ezért most nem kaptál új XP-t. ${nextSuggestion}`,
-    true
-  );
-} else {
-  setTaskFeedback(
-    `✅ Jó megoldás! +${result.xpAwarded} XP jóváírva.${levelUpMessage} ${nextSuggestion}`,
-    true
-  );
-}
+    if (result.alreadyCompleted) {
+      setTaskFeedback(
+        `✅ Jó megoldás! Ezt a feladatot már korábban teljesítetted, ezért most nem kaptál új XP-t. ${nextSuggestion}`,
+        true
+      );
+    } else {
+      setTaskFeedback(
+        `✅ Jó megoldás! +${result.xpAwarded} XP jóváírva.${levelUpMessage} ${nextSuggestion}`,
+        true
+      );
+    }
   });
 }
 
-function initProgress() {
+async function initProgress() {
   loadProgress();
+
+  // Ha van bejelentkezett felhasználó, akkor a haladást backendből kérjük le.
+  if (currentUser && currentUser.id) {
+    const backendProgress = await fetchUserProgress(currentUser.id);
+    applyBackendProgress(backendProgress);
+    saveProgress();
+  }
 
   // ha van utolsó lecke mentve, arra ugrunk vissza, különben intro
   const candidate = progressState.lastLessonId;
